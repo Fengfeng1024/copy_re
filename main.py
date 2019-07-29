@@ -17,11 +17,11 @@ import model
 from const import DecoderMethod
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-c', dest='configfile', type=str, help='path of the config file')
+parser.add_argument('-c', dest='configfile', type=str, default='config.json', help='path of the config file')
 parser.add_argument('-t', dest='is_train', type=int, default=0, choices=[0, 1, 2],
                     help='0 for train, 1 for test and 2 for valid')
 parser.add_argument('-cell', dest='cell_name', type=str, default='lstm', help='cell name: lstm or gru')
-parser.add_argument('-g', dest='gpu', type=str, default='', help='gpu id')
+parser.add_argument('-g', dest='gpu', type=str, default='2', help='gpu id')
 
 args = parser.parse_args()
 config_filename = args.configfile
@@ -103,9 +103,9 @@ def test_model(data, decoder, sess, show_rate, is_visualize, simple=True):
         visualize_normal_file = os.path.join(config.runner_path, 'visualize_normal_instance.txt')
         visualize_multi_file = os.path.join(config.runner_path, 'visualize_multi_instance.txt')
         visualize_overlap_file = os.path.join(config.runner_path, 'visualize_overlap_instance.txt')
-        print visualize_normal_file
-        print visualize_multi_file
-        print visualize_overlap_file
+        print(visualize_normal_file)
+        print(visualize_multi_file)
+        print(visualize_overlap_file)
         evaluation.visualize(sents_id, gold, predictes,
                              [visualize_normal_file, visualize_multi_file, visualize_overlap_file], config)
     return f1, precision, recall
@@ -189,40 +189,39 @@ def get_model(train_method, config):
     return decoder, sess
 
 
-if __name__ == '__main__':
-    if config.dataset_name == const.DataSet.NYT:
-        prepare = data_prepare.NYTPrepare(config)
-    elif config.dataset_name == const.DataSet.WEBNLG:
-        prepare = data_prepare.WebNLGPrepare(config)
-    else:
-        print 'illegal dataset name: %s' % config.dataset_name
-        exit()
+if config.dataset_name == const.DataSet.NYT:
+    prepare = data_prepare.NYTPrepare(config)
+elif config.dataset_name == const.DataSet.WEBNLG:
+    prepare = data_prepare.WebNLGPrepare(config)
+else:
+    print('illegal dataset name: %s' % config.dataset_name)
+    exit()
 
-    decoder, sess = get_model(train_method=config.train_method, config=config)
-    # decoder, sess = None, None
+decoder, sess = get_model(train_method=config.train_method, config=config)
+# decoder, sess = None, None
 
-    logger.info('Prepare {} data'.format(train_test_valid))
-    data = prepare.load_data(train_test_valid.lower())
-    data = prepare.process(data)
-    data = data_prepare.Data(data, config.batch_size, config)
+logger.info('Prepare {} data'.format(train_test_valid))
+data = prepare.load_data(train_test_valid.lower())
+data = prepare.process(data)
+data = data_prepare.Data(data, config.batch_size, config)
 
-    if is_train:
-        logger.info('****************************** NLL Train ******************************')
-        train_NLL_model(data, epoch_range=range(1, config.epoch_number + 1), decoder=decoder, sess=sess)
-    else:
-        logger.info(
-            '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ {} Dataset $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'.format(train_test_valid))
+if is_train:
+    logger.info('****************************** NLL Train ******************************')
+    train_NLL_model(data, epoch_range=range(1, config.epoch_number + 1), decoder=decoder, sess=sess)
+else:
+    logger.info(
+        '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ {} Dataset $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'.format(train_test_valid))
 
-        # ===================
-        # epoch = 1
-        # saver = tf.train.Saver()
-        # model_name = 'model-{}'.format(epoch)
-        # model_filename = os.path.join(config.runner_path, model_name)
-        # logger.info('Test model: {}'.format(model_name))
-        # saver.restore(sess, model_filename)
-        # test_model(data, decoder=decoder, sess=sess, show_rate=None, is_visualize=True, simple=False)
+    # ===================
+    # epoch = 1
+    # saver = tf.train.Saver()
+    # model_name = 'model-{}'.format(epoch)
+    # model_filename = os.path.join(config.runner_path, model_name)
+    # logger.info('Test model: {}'.format(model_name))
+    # saver.restore(sess, model_filename)
+    # test_model(data, decoder=decoder, sess=sess, show_rate=None, is_visualize=True, simple=False)
 
-        # =============
-        model_epoch = range(1, 51, 1)
-        # model_epoch = range(1, 100, 2)
-        test_all_models(model_epoch, data, decoder, sess, config)
+    # =============
+    model_epoch = range(1, 51, 1)
+    # model_epoch = range(1, 100, 2)
+    test_all_models(model_epoch, data, decoder, sess, config)

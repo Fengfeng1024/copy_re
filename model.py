@@ -22,7 +22,7 @@ def selu(x):
 def get_embedding_table(config):
     if os.path.isfile(config.words_id2vector_filename):
         logger.info('Word Embedding init from %s' % config.words_id2vector_filename)
-        words_id2vec = json.load(open(config.words_id2vector_filename, 'r'))
+        words_id2vec = json.load(open(config.words_id2vector_filename, 'r', encoding='utf-8'))
         words_vectors = [0] * len(words_id2vec)
         for id, vec in words_id2vec.items():
             words_vectors[int(id)] = vec
@@ -121,7 +121,7 @@ class Encoder:
 class Decoder:
     def __init__(self, decoder_output_max_length, embedding_table, encoder, config):
         self.config = config
-        self.decoder_cell_number = self.config.decoder_output_max_length / 3
+        self.decoder_cell_number = self.config.decoder_output_max_length // 3
         self.embedding_table = embedding_table
         self.decoder_output_max_length = decoder_output_max_length
 
