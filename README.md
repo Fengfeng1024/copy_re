@@ -1,6 +1,6 @@
  This code is for ACL2018 paper "Extracting Relational Facts by an End-to-End Neural Model with Copy Mechanism"
 ## Environment
- - python2.7
+ - python3
  - [requirements.txt](https://github.com/xiangrongzeng/copy_re/blob/master/requirements.txt)
 
 ## Data
